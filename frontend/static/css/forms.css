@@ -1,0 +1,65 @@
+.form-page {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+    box-shadow: var(--shadow-sm);
+}
+
+.form-section-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+}
+
+.customer-form .form-row, 
+.product-form .form-row {
+    margin-bottom: var(--space-4);
+}
+
+.gst-verify-section {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.gst-verify-section .form-group {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.gst-result-card {
+    background-color: #F9FAFB;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-top: var(--space-2);
+    font-size: 13px;
+}
+
+.gst-result-card p {
+    margin-bottom: var(--space-1);
+}
+
+.gst-result-card p strong {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}

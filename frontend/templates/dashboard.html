@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% set active_page = "dashboard" %}
+
+{% block title %}Dashboard - GST Billing{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block header_actions %}
+    <a href="/invoices/new" class="btn btn-primary">➕ New Invoice</a>
+    <a href="/customers/new" class="btn btn-secondary">👥 Add Customer</a>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Stats Grid -->
+    <div class="stats-grid" id="statsGrid">
+        <!-- Populated by JS -->
+    </div>
+
+    <!-- Recent Invoices -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Recent Invoices</h2>
+            <a href="/invoices" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table" id="recentInvoicesTable">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Date</th>
+                        <th>Customer / Party</th>
+                        <th style="text-align: right;">Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recentInvoicesBody">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

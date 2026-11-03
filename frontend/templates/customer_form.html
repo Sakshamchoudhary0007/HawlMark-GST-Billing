@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% set active_page = "customers" %}
+
+{% block title %}{% if customer_id %}Edit Customer{% else %}Add Customer{% endif %} - GST Billing{% endblock %}
+
+{% block page_title %}{% if customer_id %}Edit Customer{% else %}Add Customer / Party{% endif %}{% endblock %}
+
+{% block header_actions %}
+    <a href="/customers" class="btn btn-secondary">Cancel</a>
+    <button type="submit" form="customerForm" class="btn btn-primary" id="saveBtn">💾 Save Customer</button>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 850px; margin: 0 auto;">
+    <form id="customerForm">
+        <input type="hidden" id="customerId" value="{{ customer_id|default('') }}">
+        
+        <input type="hidden" id="panNumber" name="pan_number">
+        <input type="hidden" id="taxpayerType" name="taxpayer_type">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" for="gstin">GSTIN (Auto-fetches Business Name & Address)</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="gstin" name="gstin" class="form-control" placeholder="15-digit GSTIN (e.g. 27AAAAA0000A1Z5)" maxlength="15" style="text-transform: uppercase; font-family: monospace; font-size: 1rem;">
+                    <button type="button" class="btn btn-secondary" id="verifyGstBtn">🔍 Fetch GST</button>
+                </div>
+                <div id="gstResultCard" style="display: none; margin-top: 0.5rem; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 6px; background-color: #f8fafc;">
+                </div>
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" for="customerName">Customer / Business Name <span style="color:red;">*</span></label>
+                <input type="text" id="customerName" name="customer_name" class="form-control" placeholder="e.g. Acme Pharmaceuticals Pvt Ltd" required minlength="2">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="licenceNumber">Licence Number (Drug/Trade/FSSAI)</label>
+                <input type="text" id="licenceNumber" name="licence_number" class="form-control" placeholder="e.g. DL-2026/89B">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="mobile">Mobile Number</label>
+                <input type="text" id="mobile" name="mobile" class="form-control" placeholder="10-digit mobile" maxlength="30">
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="email@domain.com">
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" for="addressLine1">Address Line 1</label>
+                <input type="text" id="addressLine1" name="address_line1" class="form-control" placeholder="Building, Street Name (Auto-fetched)">
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" for="addressLine2">Address Line 2</label>
+                <input type="text" id="addressLine2" name="address_line2" class="form-control" placeholder="Area, Landmark (Auto-fetched)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="city">City</label>
+                <input type="text" id="city" name="city" class="form-control" placeholder="City">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="pincode">Pincode</label>
+                <input type="text" id="pincode" name="pincode" class="form-control" placeholder="6-digit pincode">
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" for="state">State</label>
+                <input type="text" id="state" name="state" class="form-control" placeholder="e.g. Maharashtra">
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" for="placeOfSupply">Place of Supply</label>
+                <input type="text" id="placeOfSupply" name="place_of_supply" class="form-control" placeholder="State/Location for Tax calculation">
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/customers.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        initCustomerForm();
+    });
+</script>
+{% endblock %}

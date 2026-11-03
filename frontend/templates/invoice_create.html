@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% set active_page = "new_invoice" %}
+
+{% block title %}{% if invoice_id %}Edit Draft Invoice{% else %}New Invoice{% endif %} - GST Billing{% endblock %}
+
+{% block page_title %}{% if invoice_id %}Edit Draft Invoice{% else %}New Invoice{% endif %}{% endblock %}
+
+{% block header_actions %}
+    <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+    <button type="button" class="btn btn-primary" id="saveDraftBtn">💾 Save Draft</button>
+{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <form id="invoiceForm">
+        <!-- Invoice Metadata -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="form-group" style="margin-bottom:0; position: relative;" id="customerSelectorWrapper">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label for="customerSearchInput" style="margin-bottom:0;">Select Customer / Party (by Name, Licence No, GSTIN)</label>
+                    <a href="/customers" target="_blank" class="btn btn-sm btn-secondary" style="font-size: 0.8rem; padding: 2px 8px; color: #2563eb; font-weight: 600; text-decoration: none; border: 1px solid #cbd5e1; background: #eff6ff;" title="Add a new customer / party">➕ Add New Party</a>
+                </div>
+                <input type="hidden" id="customerId" name="customer_id" required>
+                <div style="position: relative;">
+                    <input type="text" id="customerSearchInput" class="form-control" placeholder="🔍 Search customer/party by Name, Licence No, GSTIN..." autocomplete="off" style="padding-right: 36px;">
+                    <button type="button" id="clearCustomerBtn" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #e2e8f0; border: none; border-radius: 50%; width: 22px; height: 22px; line-height: 20px; text-align: center; cursor: pointer; color: #475569; font-size: 0.9rem; font-weight: bold; padding: 0;" title="Clear customer">&times;</button>
+                </div>
+                
+                <!-- Custom Dropdown Menu -->
+                <div id="customerDropdownMenu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); max-height: 280px; overflow-y: auto; margin-top: 4px;">
+                    <div id="customerDropdownList">
+                        <!-- Customer items injected dynamically -->
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label for="invoiceDate">Invoice Date</label>
+                <input type="date" id="invoiceDate" name="invoice_date" class="form-control" required>
+            </div>
+        </div>
+
+        <!-- Selected Customer Card -->
+        <div id="customerSummaryCard" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h4 id="custCardName" style="margin:0 0 6px 0; color: #0f172a; font-size: 1.1rem; font-weight: 700;">-</h4>
+                    <div style="color: #475569; display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 0.9rem;">
+                        <span>📜 <strong>Licence No:</strong> <span id="custCardLicence" style="font-family: monospace; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600;">-</span></span>
+                        <span>🏛️ <strong>GSTIN:</strong> <span id="custCardGstin" style="font-weight: 600;">-</span></span>
+                        <span>📍 <strong>State:</strong> <span id="custCardState" style="font-weight: 600;">-</span></span>
+                    </div>
+                    <div id="custCardAddress" style="color: #64748b; font-size: 0.85rem; margin-top: 6px;">-</div>
+                </div>
+                <a id="editCustLink" href="#" target="_blank" class="btn btn-sm btn-secondary" style="font-size: 0.8rem;">Edit Party</a>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="form-group" style="margin-bottom:0;">
+                <label for="taxMode">Tax Mode</label>
+                <select id="taxMode" name="tax_mode" class="form-control" required>
+                    <option value="CGST_SGST">CGST/SGST (Intra-state)</option>
+                    <option value="IGST">IGST (Inter-state)</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0; display: flex; align-items: flex-end; padding-bottom: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer;">
+                    <input type="checkbox" id="reverseCharge" name="reverse_charge" style="width: 18px; height: 18px; accent-color: #2563eb;">
+                    <span>Reverse Charge Applicable</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Line Items -->
+        <div style="margin-top: 2rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.75rem;">
+            <h3 style="margin:0; font-size: 1.1rem; font-weight: 700; color: #0f172a;">Line Items</h3>
+            <button type="button" class="btn btn-secondary btn-sm" id="addLineItemBtn">➕ Add Item</button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table" id="lineItemsTable" style="margin-bottom: 1rem;">
+                <thead>
+                    <tr>
+                        <th style="width: 5%; text-align: center;">S.No</th>
+                        <th style="width: 32%">Product / Description</th>
+                        <th style="width: 12%">CAT</th>
+                        <th style="width: 13%">HSN/SAC</th>
+                        <th style="width: 10%">Qty</th>
+                        <th style="width: 14%">Rate (₹)</th>
+                        <th style="width: 10%; text-align: right;">Amount (₹)</th>
+                        <th style="width: 4%"></th>
+                    </tr>
+                </thead>
+                <tbody id="lineItemsBody">
+                    <!-- Dynamic rows here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary & Extras (Notes & Terms left, Totals card right) -->
+        <div style="display: flex; gap: 1.5rem; margin-top: 1.5rem; align-items: flex-start;">
+            <div style="flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="notes">Notes / Remarks</label>
+                    <textarea id="notes" name="notes" class="form-control" rows="5" placeholder="Additional notes for customer..."></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="terms">Terms & Conditions</label>
+                    <textarea id="terms" name="terms" class="form-control" rows="5" placeholder="Invoice terms of sale...">1. E. & O.E.
+2. Received the precious metal / Jewellery in satisfactory Condition.
+3. Subject to 'Palghar' Jurisdiction only.</textarea>
+                </div>
+            </div>
+            <div class="card" style="width: 380px; min-width: 320px; padding: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 0; flex-shrink: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; color: #475569; white-space: nowrap;">
+                    <span>Total Quantity:</span>
+                    <span id="summaryTotalQty" style="font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums; padding-left: 12px;">0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; color: #475569; white-space: nowrap;">
+                    <span>Subtotal:</span>
+                    <span id="summarySubtotal" style="font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums; padding-left: 12px;">₹0.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; color: #475569; white-space: nowrap;">
+                    <span>Taxable Amount:</span>
+                    <span id="summaryTaxable" style="font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums; padding-left: 12px;">₹0.00</span>
+                </div>
+                <div class="cgst-row" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; color: #475569; white-space: nowrap;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span>CGST:</span>
+                        <input type="number" id="cgstPercent" class="form-control" placeholder="1.5" min="0" max="50" step="0.1" style="width: 65px; height: 28px; padding: 2px 6px; font-size: 0.85rem; text-align: right;" title="CGST Rate %">
+                        <span>%</span>
+                    </div>
+                    <span id="summaryCgst" style="font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums; padding-left: 12px;">₹0.00</span>
+                </div>
+                <div class="sgst-row" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; color: #475569; white-space: nowrap;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span>SGST:</span>
+                        <input type="number" id="sgstPercent" class="form-control" placeholder="1.5" min="0" max="50" step="0.1" style="width: 65px; height: 28px; padding: 2px 6px; font-size: 0.85rem; text-align: right;" title="SGST Rate %">
+                        <span>%</span>
+                    </div>
+                    <span id="summarySgst" style="font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums; padding-left: 12px;">₹0.00</span>
+                </div>
+                <div class="igst-row" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; color: #475569; white-space: nowrap; display: none;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span>IGST:</span>
+                        <input type="number" id="igstPercent" class="form-control" placeholder="3.0" min="0" max="100" step="0.1" style="width: 65px; height: 28px; padding: 2px 6px; font-size: 0.85rem; text-align: right;" title="IGST Rate %">
+                        <span>%</span>
+                    </div>
+                    <span id="summaryIgst" style="font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums; padding-left: 12px;">₹0.00</span>
+                </div>
+                <div style="border-top: 2px solid #cbd5e1; margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 1.2rem; color: #0f172a; white-space: nowrap;">
+                    <span>Grand Total:</span>
+                    <span id="summaryGrandTotal" style="color: #2563eb; font-variant-numeric: tabular-nums; padding-left: 12px;">₹0.00</span>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Template for Line Item Row -->
+<template id="lineItemTemplate">
+    <tr class="line-item-row">
+        <td class="item-sno" style="vertical-align: middle; text-align: center; font-weight: 600; color: #64748b;">1</td>
+        <td>
+            <input type="text" class="form-control item-desc" placeholder="Product Name / Description" required>
+        </td>
+        <td><input type="text" class="form-control item-cat" placeholder="e.g. 22K"></td>
+        <td><input type="text" class="form-control item-hsn" placeholder="HSN/SAC"></td>
+        <td><input type="number" class="form-control item-qty" placeholder="1" min="1" step="1" required></td>
+        <td><input type="number" class="form-control item-rate" placeholder="0.00" min="0" step="0.01" required></td>
+        <td class="item-amount" style="vertical-align: middle; font-weight: 700; text-align: right;">0.00</td>
+        <td style="vertical-align: middle; text-align: center;">
+            <button type="button" class="btn btn-danger btn-sm remove-item-btn" style="padding: 4px 8px; border-radius: 50%; width: 28px; height: 28px; line-height: 1;">&times;</button>
+        </td>
+    </tr>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/invoice.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof InvoiceManager !== 'undefined') {
+            const editId = {{ invoice_id if invoice_id else 'null' }};
+            InvoiceManager.initCreate(editId);
+        }
+    });
+</script>
+{% endblock %}

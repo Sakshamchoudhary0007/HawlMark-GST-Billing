@@ -1,0 +1,31 @@
+{
+  "customer_create": {
+    "customer_name": "Example Party",
+    "gstin": "27XXXXXXXXXXXXX",
+    "licence_number": "LIC-001",
+    "pan_number": "XXXXXXXXXX",
+    "mobile": "9999999999",
+    "email": "example@example.com",
+    "address_line1": "Example Street",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "state_code": "27",
+    "pincode": "400001"
+  },
+  "invoice_create": {
+    "customer_id": 123,
+    "invoice_date": "2026-09-22",
+    "tax_mode": "CGST_SGST",
+    "items": [
+      {
+        "product_id": 10,
+        "description": "Example Product",
+        "hsn_sac": "998346",
+        "quantity": "2.0000",
+        "unit": "Pcs",
+        "rate": "100.0000",
+        "gst_rate": "18.00"
+      }
+    ]
+  }
+}

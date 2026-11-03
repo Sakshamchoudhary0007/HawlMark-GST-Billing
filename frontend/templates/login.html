@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - GST Billing</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <style>
+        body {
+            background-color: var(--bg-color, #f4f6f8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .auth-header h1 { margin: 0; color: #333; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group input { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .btn-primary { width: 100%; padding: 0.75rem; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        .btn-primary:hover { background-color: #004494; }
+        .btn-primary:disabled { background-color: #a0c4e8; cursor: not-allowed; }
+        .auth-links { margin-top: 1rem; text-align: center; font-size: 0.9rem; }
+        .auth-links a { color: #0056b3; text-decoration: none; }
+        .auth-links a:hover { text-decoration: underline; }
+        #errorMsg { color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; padding: 0.75rem; text-align: center; margin-bottom: 1rem; display: none; font-size: 0.9rem; }
+        #successMsg { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; padding: 0.75rem; text-align: center; margin-bottom: 1rem; display: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>GST Billing</h1>
+            <p>Welcome back! Please login.</p>
+        </div>
+        <div id="errorMsg"></div>
+        <div id="successMsg"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
+            </div>
+            <button type="submit" class="btn-primary" id="loginBtn">Login</button>
+        </form>
+        <div class="auth-links">
+            <p><a href="#">Forgot password?</a></p>
+            <p>Don't have an account? <a href="/register">Register</a></p>
+        </div>
+    </div>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "project": "GST Billing Application",
+  "architecture_version": "1.0",
+  "main_technology": "Python",
+  "frontend": {
+    "technology": "HTML + CSS + JavaScript",
+    "principle": "server-rendered or static HTML with JavaScript for dynamic interactions; no frontend framework required for v1"
+  },
+  "backend": {
+    "language": "Python",
+    "framework": "FastAPI",
+    "orm": "SQLAlchemy 2.x",
+    "validation": "Pydantic v2",
+    "migrations": "Alembic"
+  },
+  "database": {
+    "engine": "MySQL 8.x",
+    "encoding": "utf8mb4",
+    "financial_type": "DECIMAL"
+  },
+  "ai": {
+    "enabled_in_v1": false,
+    "required_in_v1": false,
+    "architecture_requirement": "core billing services must remain independent of AI so AI can be added later without rewriting them"
+  },
+  "invoice_numbering": "server-side transactional sequence",
+  "historical_invoice_strategy": "seller and customer snapshots",
+  "security": "authentication, authorization, business-level isolation, secret management, audit logging",
+  "development_principle": "modular, configurable, testable, migration-driven"
+}

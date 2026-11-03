@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% set active_page = "invoices" %}
+
+{% block title %}Invoice History - GST Billing{% endblock %}
+
+{% block page_title %}Invoice History{% endblock %}
+
+{% block header_actions %}
+    <a href="/invoices/new" class="btn btn-primary">➕ New Invoice</a>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 1.25rem;">
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+        <div style="flex: 1; min-width: 250px;">
+            <input type="text" id="searchInvoice" class="form-control" placeholder="🔍 Search by Invoice #, Customer name...">
+        </div>
+        <div style="width: 180px;">
+            <select id="filterStatus" class="form-control">
+                <option value="">All Statuses</option>
+                <option value="DRAFT">Draft</option>
+                <option value="FINALIZED">Finalized</option>
+                <option value="CANCELLED">Cancelled</option>
+            </select>
+        </div>
+        <button id="refreshBtn" class="btn btn-secondary">🔄 Refresh</button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table" id="invoicesTable">
+            <thead>
+                <tr>
+                    <th style="text-align: left;">Date</th>
+                    <th style="text-align: left;">Invoice #</th>
+                    <th style="text-align: left;">Customer / Party Name</th>
+                    <th style="text-align: center;">Status</th>
+                    <th style="text-align: right; padding-right: 1rem;">Grand Total (₹)</th>
+                    <th style="text-align: right; padding-right: 1rem;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="invoicesBody">
+                <tr><td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">Loading invoices...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="pagination" style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.5rem;">
+        <!-- Pagination buttons injected here -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/invoice.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof InvoiceManager !== 'undefined') {
+            InvoiceManager.initHistory();
+        }
+    });
+</script>
+{% endblock %}

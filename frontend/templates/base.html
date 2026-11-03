@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GST Billing{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/layout.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/invoice.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-layout" id="appLayout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <span class="brand-icon">⚡</span>
+                    <span class="brand-name">GST Billing</span>
+                </div>
+                <div class="header-toggle-group">
+                    <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Minimize Sidebar">◀</button>
+                    <button class="mobile-close" id="mobileCloseBtn" title="Close Sidebar">&times;</button>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                {% set active_page = active_page|default('dashboard') %}
+                <a href="/dashboard" class="sidebar-nav-item {% if active_page == 'dashboard' %}active{% endif %}" title="Dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/customers" class="sidebar-nav-item {% if active_page == 'customers' %}active{% endif %}" title="Customers">
+                    <span class="nav-icon">👥</span>
+                    <span>Customers</span>
+                </a>
+                <a href="/invoices/new" class="sidebar-nav-item {% if active_page == 'new_invoice' %}active{% endif %}" title="New Invoice">
+                    <span class="nav-icon">➕</span>
+                    <span>New Invoice</span>
+                </a>
+                <a href="/invoices" class="sidebar-nav-item {% if active_page == 'invoices' %}active{% endif %}" title="Invoice History">
+                    <span class="nav-icon">📄</span>
+                    <span>Invoice History</span>
+                </a>
+                <a href="/settings" class="sidebar-nav-item {% if active_page == 'settings' or active_page == 'users' %}active{% endif %}" id="navUsers" title="Settings & Bank Details">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Settings & Bank Details</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn btn-secondary btn-block" title="Logout" style="width: 100%;">
+                    <span class="nav-icon">🚪</span>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="main-wrapper">
+            <!-- Top Navigation Bar -->
+            <header class="top-navbar">
+                <div class="top-navbar-left">
+                    <button class="mobile-toggle" id="mobileToggleBtn" title="Toggle Navigation Sidebar">☰</button>
+                    <div class="page-title-heading">
+                        {% block page_header %}
+                        <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                        {% endblock %}
+                    </div>
+                </div>
+                
+                <div class="top-navbar-right">
+                    <div class="header-actions">
+                        {% block header_actions %}{% endblock %}
+                    </div>
+                    <div class="user-profile-badge" id="userProfileName">
+                        Loading...
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Main Content Area -->
+            <main class="content-container">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/components.js"></script>
+    <script>
+        // Sidebar Toggle & Collapse Handlers
+        const appLayout = document.getElementById('appLayout');
+        const sidebar = document.getElementById('sidebar');
+        const collapseBtn = document.getElementById('sidebarCollapseBtn');
+        const mobileToggleBtn = document.getElementById('mobileToggleBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+
+        // Restore saved sidebar collapsed state
+        if (localStorage.getItem('sidebar_collapsed') === '1') {
+            appLayout?.classList.add('sidebar-collapsed');
+            if (collapseBtn) collapseBtn.textContent = '▶';
+        }
+
+        function toggleSidebarMinimize() {
+            const isNarrow = window.innerWidth <= 900;
+            if (isNarrow) {
+                // Mobile/Narrow Drawer Toggle
+                if (sidebar?.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                } else {
+                    sidebar.classList.add('open');
+                }
+            } else {
+                // Desktop Collapse Toggle
+                const isCollapsed = appLayout?.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+                if (collapseBtn) collapseBtn.textContent = isCollapsed ? '▶' : '◀';
+            }
+        }
+
+        mobileToggleBtn?.addEventListener('click', toggleSidebarMinimize);
+        collapseBtn?.addEventListener('click', toggleSidebarMinimize);
+        mobileCloseBtn?.addEventListener('click', () => {
+            sidebar?.classList.remove('open');
+        });
+
+        document.getElementById('logoutBtn')?.addEventListener('click', () => {
+            if (typeof API !== 'undefined') {
+                API.clearTokens();
+                window.location.href = '/login';
+            }
+        });
+
+        // Load logged in user details into header topbar
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof API !== 'undefined' && API.getToken()) {
+                try {
+                    const user = await API.get('/auth/me');
+                    const profileEl = document.getElementById('userProfileName');
+                    if (profileEl && user) {
+                        const escapeHTML = typeof Utils !== 'undefined' && Utils.escapeHtml ? Utils.escapeHtml : (str) => str;
+                        profileEl.innerHTML = `<span class="user-avatar">👤</span> <strong>${escapeHTML(user.name)}</strong> <span class="role-tag">${escapeHTML(user.role)}</span>`;
+                    }
+                } catch(e) {
+                    console.warn('Could not load user profile', e);
+                }
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
